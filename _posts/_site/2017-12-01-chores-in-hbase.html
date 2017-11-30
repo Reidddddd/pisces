@@ -1,0 +1,45 @@
+<blockquote>
+  <p>If reasons fail, try code.</p>
+</blockquote>
+
+<h2 id="scheduledchore">ScheduledChore</h2>
+
+<p><code class="highlighter-rouge">ScheduledChore</code>s are scheduled and performed periodically in hbase, responsible for various tasks. There are many chores in master, regionserver, thrift server. They are put in a queue owned by <code class="highlighter-rouge">ChoreService</code>. Because of periodic, each chore has its own start time (configurable) and may be different from others. And in <code class="highlighter-rouge">ChoreService</code>, there are workers polling chores from queue and executing tasks of chores, the number of workers dynamically changes, starting from one. You may notice it is possible that a chore may miss its start time, and this is the moment of increasing the number of workers, indicating the need of more workers to speed up executing tasks of chores, while decreasing the number of workers is not an usual case which happens only at stopping status.</p>
+
+<h3 id="chores-in-master">Chores in Master</h3>
+
+<p><code class="highlighter-rouge">HFileCleaner</code>, for cleaning hfile archives under ${hbase.rootdir}/archive folder every minute by default.<br />
+<code class="highlighter-rouge">LogCleaner</code>, for cleaning oldWALs under ${hbase.rootdir}/oldWALs folder every minute by default.<br />
+<code class="highlighter-rouge">BalancerChore</code>, for balancing regions in cluster every 5 minutes by default.<br />
+<code class="highlighter-rouge">CatalogJanitor</code>, for cleaning merged regions and splited regions in hbase:meta every by default.<br />
+<code class="highlighter-rouge">ClusterStatusChore</code>, for feeding cluster status to balancer every minute by default.<br />
+<code class="highlighter-rouge">ClusterStatusPublisher</code>, for publishing dead regionservers to client every 10 seconds by default.<br />
+<code class="highlighter-rouge">ExpiredMobFileCleanerChore</code>, for cleaning expired (ttl set and min version is 0) mob file every day by default.<br />
+<code class="highlighter-rouge">MobCompactionChore</code>, for running compaction to merge mob files every week by default.<br />
+<code class="highlighter-rouge">QuotaObserverChore</code>, for receiving region filesystem-space usage reports and taking actions on those violating a defined quota every minute by default.<br />
+<code class="highlighter-rouge">RegionNormalizerChore</code>, for normalizing regions (merge or split) every 5 minutes by default.<br />
+<code class="highlighter-rouge">ReplicationMetaCleaner</code>, for cleaning useless data in hbase:meta used by serial replication every minute by default.<br />
+<code class="highlighter-rouge">ReplicationZKNodeCleanerChore</code>, for cleaning replication queues belonging to the peer which does not exist every minute by default.<br />
+<code class="highlighter-rouge">SnapshotQuotaObserverChore</code>, for computing the size of each snapshot created from a table with a space quota every 5 minutes by default.<br />
+<code class="highlighter-rouge">TimeoutMonitor</code>, for checking split tasks and resubmiting those time out every second by default.</p>
+
+<h3 id="chores-in-regionserver">Chores in RegionServer</h3>
+
+<p><code class="highlighter-rouge">nonceCleaner</code>(inner class), for cleaning up old nonces every 12 seconds by default.<br />
+<code class="highlighter-rouge">CompactionThroughputTuner</code>, for tuning max throughput for compaction every minute by default.<br />
+<code class="highlighter-rouge">FlushThroughputTuner</code>, for tuning max throughput for flush every minute by default.<br />
+<code class="highlighter-rouge">CompactedHFilesDischarger</code>, for cleaning up compacted files which are no longer in use and its entries in block cache every 2 minutes by default.<br />
+<code class="highlighter-rouge">CompactionChecker</code>, for checking if regions need compaction every 10 seconds by default.<br />
+<code class="highlighter-rouge">FileSystemUtilizationChore</code>, for computing the size of each region on the fs hosted by regionserver every 5 minutes by default.<br />
+<code class="highlighter-rouge">HealthCheckChore</code>, for checking health of region server every 10 seconds by default.<br />
+<code class="highlighter-rouge">HeapMemoryTunerChore</code>, for tuning memories every minute by default.<br />
+<code class="highlighter-rouge">MovedRegionsCleaner</code>, for cleaning those moved regions cache every 2 minutes by default.<br />
+<code class="highlighter-rouge">PeriodicMemStoreFlusher</code>, for flushing memstore every 5 minutes by default.<br />
+<code class="highlighter-rouge">QuotaRefresherChore</code>, for updating quotas of namespace, table and user every 5 minutes by default.<br />
+<code class="highlighter-rouge">SpaceQuotaRefresherChore</code>, for updating information from hbase:quota every minute by default.<br />
+<code class="highlighter-rouge">StorefileRefresherChore</code>, for refreshing those store files of secondary regions hosted in the region servers disable by default.</p>
+
+<h3 id="chores-in-others">Chores in Others</h3>
+<p><code class="highlighter-rouge">ConnectionCleaner</code>, for cleaning connections idle for a long time used in REST server and Thrift server every 10 seconds by default.<br />
+<code class="highlighter-rouge">RefreshCredentials</code>, for refreshing kerberos tgt every 30 seconds by default.</p>
+
