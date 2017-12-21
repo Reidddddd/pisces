@@ -229,6 +229,6 @@ Distributions means the probability of a record to be performed (insert, update,
 | histogram.buckets | 1000 | range of latencies to track in the histogram (milliseconds) |
 | timeseries.granularity | 1000 | granularity for time series (in milliseconds) |
 
-### Overall
+## Overall
 
 I tried both, `YCSB` is much more authoritative in test cases and more informative on result report. While `PerformanceEvaluation` is more like a functional test, it can train you how to write a client program in effective way.
