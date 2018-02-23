@@ -27,21 +27,35 @@ Following figure shows our architecture.
 ![Figure 1](https://raw.githubusercontent.com/Reidddddd/reidddddd.github.io/master/assets/images/architecture.jpg)
 
 ## Performance Evaluation
-To be more prudent to evaluate the performance alluxio can bring, we design an experiment, 4 typical online sqls with differentsizes picked up, and we run these sqls several times on yarn, spark, alluxio and alluxio with only one HDD layer, respectively. More detailed, yarn mode is our online mode, spark mode means tasks running on label cluster but without alluxio as middle layer, and alluxio mode also runs on label cluster with RAM and HDD 2 layers configured, the fourth mode is nearly the same as third mode without RAM layer only. Of course, computation resources are ensured to be obtainable in label cluster as much as online mode. Following figures show the information of sqls and performance outcome.
-![Figure 2](https://raw.githubusercontent.com/Reidddddd/reidddddd.github.io/master/assets/images/sqls.png)
-![Figure 3](https://raw.githubusercontent.com/Reidddddd/reidddddd.github.io/master/assets/images/performance.png)
+To be more prudent to evaluate the performance alluxio can bring, we design an experiment, 4 typical online sqls with differentsizes picked up, and we run these sqls several times on yarn, spark, alluxio and alluxio with only one HDD layer, respectively. More detailed, yarn mode is our online mode, spark mode means tasks running on label cluster but without alluxio as middle layer, and alluxio mode also runs on label cluster with RAM and HDD 2 layers configured, the fourth mode is nearly the same as third mode without RAM layer only. Of course, computation resources are ensured to be obtainable in label cluster as much as online mode.  
+General speaking, comparing yarn and alluxio mode is enough, but the former is much more complex than the latter since resources sharing and competition. That's why we include spark mode as a control group. Similiar idea occurs to alluxio 1 mode, as another control group to show the performance gap between with and without MEM layer.  
+Following table shows the information of sqls, and figure shows the performance outcome, and cold reading(first time) counts. Unit is seconds for x-axis. 
+
+| Online SQL | Input Size |
+| :---: | :---: |
+| SQL 1 | 1T |
+| SQL 2 | 1.5T |
+| SQL 3 | 5T |
+| SQL 4 | 300G |
+ 
+![Figure 2](https://raw.githubusercontent.com/Reidddddd/reidddddd.github.io/master/assets/images/performance.png)
 
 From performance figure, we can draw few inferences:
+* Overall, alluxio can boost up performance as expectation.
+* Even with cold reading, alluxio mode still well performs over others in most cases.
+* By comparing alluxio 2 and 1 mode, the performance gap is not so big enough to make user have to use a MEM layer.
+* Spark has its own cache and memory mechanism, we have tried some toy examples with small input size, spark is as fast as alluxio or even faster, but as size grows exceeding all executors's jvm memory (in fact, alluxio uses offheap techniques), its performance can't follow.
+* One EXCEPTION on SQL 4, we find it reads whole data of a block which may not suit the passive cache mechanism in alluxio, especially to cold reading. 
 
 
 ## What We Have Done
 * For spark thrift server, we develop a whitelist feature with which alluxio will load data accordingly, in this way, space in alluxio is made in full use without unnecessary loading and eviction.
 * What's more, to make alluxio transparent to user, meaning without modifying any codes or sqls from client side, automatically switching between schemes is developed.  
 
-Therefore, if sql is a query and table involved is in whitelist, then the path of table will be transformed to alluxio scheme, and application can read it from alluxio. If sql is an execution, it remains the same as origin, runs and writes to remote(hdfs in our case) directly.
+Therefore, if sql is a query and table involved is in whitelist, then the path of table will be transformed to an uri with alluxio scheme, and application can read it from alluxio. If sql is an execution, it remains the same as origin, runs and writes to remote(hdfs in our case) directly.
 
 ## Summary and Future
-There's no doubt that alluxio does improve performance in most of cases, and we are planing to put it into greater practice by migrating more tasks running on it. In addition, we will take more efforts on security, stability and job monitoring issues and keeping pace with community.  
+There's no doubt that alluxio does improve performance in most cases, and we are planing to put it into greater practice by migrating more tasks running on it. In addition, we will take more efforts on security, stability and job monitoring issues and keeping pace with community.  
 But few things need second thoughts:
 * Fetching data from remote is still an expensive behaviors, and its speed is restrained by network bandwidth;
 * Size of label cluster is limited compared to online cluster which comprises thousands of machines, such that RAM we can provided has a low upperlimit;
