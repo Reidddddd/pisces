@@ -5,14 +5,14 @@ Alluxio clusters act as a read/write cache for data in connected storage systems
 ## Considerations about Alluxio
 1. There are plenty of master-slaves architectures in big data ecosystem. Those centralized system have a same problem, they have various states and a great numbers of meta, not to mention the exact data, which means once master is overwhelmed whole system could hardly function normally. We can say those services a sort of heavy-weighed services, while a light-weighed service is stateless or its states does not count importance. Unfornately, alluxio is one of heavy-weighed services and brings pressures on our dev/ops team.
 2. To make full use of alluxio, memory is necessary. Both reading from and writing to memory are definitely fast without doubt, but here comes the questions.
-* Since cold reading will trigger fetching data from remote, does tasks running on alluxio still well perform over normal cases?
+* Since cold reading will trigger fetching data from remote, do tasks running on alluxio still well perform over normal cases?
 * Do we need to load every data fetched from remote into alluxio?
 * If we write data to remote(like HDFS) ultimatly, why do we prefer write through alluxio rather than directly write to HDFS? The former obviously adds some overhead.
 * If we do write data to alluxio first, what will happen when machines break down, or alluxio master break down?
 
 ## How We Play
 The answer to the first consideration is scenario matters.  
-We can't change the architecture of system, but we can choose those metas and its relative data it stores does not matter. In this case, even if a master or worker breaks down, we can just format, restart cluster and reload data from remote, which indicates that those data must not be new created.  
+We can't change the architecture of the system, but we can choose those metas and its relative data it stores does not matter. In this case, even if a master or worker breaks down, we can just format, restart cluster and reload data from remote, which indicates that those data must not be new created.  
 While the performance of writing through is hard to tell, because it is a multi-variable control question. We don't want to take that risk, and keeping fundamental file system stable is our priority. In short, writing scenario is not in our playlist.  
 Last but not least, data loaded into alluxio should be frequently read, only in this way can alluxio play its strengths, otherwise causes wasting on memory space as well as network bandwidth to fetch data.  
 In conclusion, thinking of easy recoverable and frequently read data, ad-hoc query is on the scene.
@@ -27,9 +27,12 @@ Following figure shows our architecture.
 ![Figure 1](https://raw.githubusercontent.com/Reidddddd/reidddddd.github.io/master/assets/images/architecture.jpg)
 
 ## Performance Evaluation
-To be more prudent to evaluate the performance alluxio can bring, we design an experiment, 4 typical online sqls with differentsizes picked up, and we run these sqls several times on yarn, spark, alluxio and alluxio with only one HDD layer, respectively. More detailed, yarn mode is our online mode, spark mode means tasks running on label cluster but without alluxio as middle layer, and alluxio mode also runs on label cluster with RAM and HDD 2 layers configured, the fourth mode is nearly the same as third mode without RAM layer only. Resources are ensured to be obtainable in label cluster as much as online mode. Following figure shows the outcome.
+To be more prudent to evaluate the performance alluxio can bring, we design an experiment, 4 typical online sqls with differentsizes picked up, and we run these sqls several times on yarn, spark, alluxio and alluxio with only one HDD layer, respectively. More detailed, yarn mode is our online mode, spark mode means tasks running on label cluster but without alluxio as middle layer, and alluxio mode also runs on label cluster with RAM and HDD 2 layers configured, the fourth mode is nearly the same as third mode without RAM layer only. Of course, computation resources are ensured to be obtainable in label cluster as much as online mode. Following figures show the information of sqls and performance outcome.
+![Figure 2](https://raw.githubusercontent.com/Reidddddd/reidddddd.github.io/master/assets/images/sqls.png)
+![Figure 3](https://raw.githubusercontent.com/Reidddddd/reidddddd.github.io/master/assets/images/performance.png)
 
-...analysis
+From performance figure, we can draw few inferences:
+
 
 ## What We Have Done
 * For spark thrift server, we develop a whitelist feature with which alluxio will load data accordingly, in this way, space in alluxio is made in full use without unnecessary loading and eviction.
