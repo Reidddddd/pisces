@@ -24,7 +24,7 @@ First of all, separtion between datanodes and workers is needed. Here are the re
 
 Second thing comes to mind it is that we need to avoid irrelevant online tasks which do not recognize alluxio scheme being scheduled on alluxio node. And node-label feature of yarn address our concern, we set up an independent and exclusive label cluster for alluxio by marking it "ad_hoc" label.
 Following figure shows our architecture.
-![Figure 1](https://github.com/Reidddddd/reidddddd.github.io/blob/master/assets/images/architecture.png)
+![Figure 1](https://github.com/Reidddddd/reidddddd.github.io/blob/master/assets/images/architecture.jpg)
 
 ## Performance Evaluation
 To be more prudent to evaluate the performance alluxio can bring, we design an experiment, 4 typical online sqls with differentsizes picked up, and we run these sqls several times on yarn, spark, alluxio and alluxio with only one HDD layer, respectively. More detailed, yarn mode is our online mode, spark mode means tasks running on label cluster but without alluxio as middle layer, and alluxio mode also runs on label cluster with RAM and HDD 2 layers configured, the fourth mode is nearly the same as third mode without RAM layer only. Resources are ensured to be obtainable in label cluster as much as online mode. Following figure shows the outcome.
