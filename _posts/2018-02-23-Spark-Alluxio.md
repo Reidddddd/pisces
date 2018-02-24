@@ -29,7 +29,7 @@ Following figure shows our architecture.
 ## Performance Evaluation
 To be more prudent to evaluate the performance alluxio can bring, we design an experiment, 4 typical online sqls with differentsizes picked up, and we run these sqls several times on yarn, spark, alluxio and alluxio with only one HDD layer, respectively. More detailed, yarn mode is our online mode, spark mode means tasks running on label cluster but without alluxio as middle layer, and alluxio mode also runs on label cluster with RAM and HDD 2 layers configured, the fourth mode is nearly the same as third mode without RAM layer only. Of course, computation resources are ensured to be obtainable in label cluster as much as online mode.  
 General speaking, comparing yarn and alluxio mode is enough, but the former is much more complex than the latter since resources sharing and competition. That's why we include spark mode as a control group. Similiar idea occurs to alluxio 1 mode, as another control group to show the performance gap between with and without MEM layer.  
-Following table shows the information of sqls, and figure shows the performance outcome, and cold reading(first time) counts. Unit is seconds for x-axis. 
+Following table shows the information of sqls, and figure shows the performance outcome, and cold reading(first time) counts. Unit is seconds for y-axis. 
 
 | Online SQL | Input Size |
 | :---: | :---: |
