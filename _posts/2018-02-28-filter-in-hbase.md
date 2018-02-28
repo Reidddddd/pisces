@@ -69,7 +69,7 @@ But it is still confusing, so following it is the call sequence.
 3. `filterAllRemaining` may be called between filter key and filter value, but it based on concrete implementation. Like `PageFilter` does filtering based on size of page, after a page is filled, `filterAllRemaining` is directly called to speed up filtering.
 4. `getNextCellHint` is just another kind of `filterCell`, but it does further filtering based on targeting to wanted cell, and it will be called only after `filterAllRemaining` returns false and `filterCell` return `SEEK_NEXT_USING_HINT`.
 5. `transformCell` is called to transform a cell into user wanted, but it is not often used.
-6. `hasFilterRow`, `filterRow` and `filterRowCells` can be regarded as an entirety. If `hasFilterRow` returns false, those two methods will not be called. And `filterRow` is the last chance to filter out entire row. Like `SingleColumnValueFilter` though found matched column, but didn't find matched value, and this row will be filtered out by `filterRow` method. `filterRowCells` is called at last to modify the pending return results list to client, it is not often used either.
+6. `hasFilterRow`, `filterRow` and `filterRowCells` can be regarded as an entirety. If `hasFilterRow` returns false, those two left methods will not be called. `filterRowCells` is called at last to modify the pending return results list to client, it is not often used either. Then `filterRow` is called, the last chance to filter out entire row. Like `SingleColumnValueFilter` though found matched column, but didn't find matched value, and this row would be filtered out by `filterRow` method.
 7. 1~6 should finish an entire row, and `reset` is called between rows to reset filter status
 
 ## Thoughts
