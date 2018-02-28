@@ -4,7 +4,7 @@ categories:
  - HBase
 ---
 
-> Never did any man yet repent of having spoken too little, whereas many have been sorry they spok so much.
+> Never did any man yet repent of having spoken too little, whereas many have been sorry they spoke so much.
 
 ## Introduction
 
@@ -41,17 +41,17 @@ public abstract class Filter {
 enum ReturnCode {
 	// Include the Cell
 	INCLUDE,
-	//Include the Cell and seek to the next column skipping older versions.
+	// Include the Cell and seek to the next column skipping older versions.
 	INCLUDE_AND_NEXT_COL,
 	// Skip this Cell
 	SKIP,
 	// Skip this column. Go to the next column in this row.
 	NEXT_COL,
 	/**
-	* Seek to next row in current family. It may still pass a cell whose family is different but
-	* row is the same as previous cell to {@link #filterCell(Cell)} , even if we get a NEXT_ROW
-	* returned for previous cell.
-	*/
+	 * Seek to next row in current family. It may still pass a cell whose family is different but
+	 * row is the same as previous cell to {@link #filterCell(Cell)} , even if we get a NEXT_ROW
+	 * returned for previous cell.
+	 */
 	NEXT_ROW,
 	// Seek to next key which is given as hint by the filter.
 	SEEK_NEXT_USING_HINT,
@@ -65,12 +65,12 @@ enum ReturnCode {
 But it is still confusing, so following it is the call sequence.
 ![Filter call sequence](https://raw.githubusercontent.com/Reidddddd/reidddddd.github.io/65d06d59c7c2afb5494e22b39ddcfb3a65c874e4/assets/images/filter.png)
 1. `isFamilyEssential` is called first, but it does no filtering, it just helps to lock on the specified column family which may bring performance benefits by avoiding unnecessary column family scanning.
-2. `filterRowKey` and `filterCell` can be regarded as entirety, first key then value, this philosophy is straightforward for a nosql system. `filterRowKey` is called to determine an entire row, while `filterCell` is called to determine a cell which return a returncode to indicate the next step. 
-3. `filterAllRemaining` may be called between filter key and filter value, but it based on concrete implementation. Like `PageFilter` does filtering based on size of page, after a page is filled, `filterAllRemaining` is directly called to speed up filtering.
-4. `getNextCellHint` is just another kind of `filterCell`, but it does further filtering based on targeting to wanted cell, and it will be called only after `filterAllRemaining` returns false and `filterCell` return `SEEK_NEXT_USING_HINT`.
-5. `transformCell` is called to transform a cell into user wanted, but it is not often used.
-6. `hasFilterRow`, `filterRow` and `filterRowCells` can be regarded as an entirety. If `hasFilterRow` returns false, those two left methods will not be called. `filterRowCells` is called at last to modify the pending return results list to client, it is not often used either. Then `filterRow` is called, the last chance to filter out entire row. Like `SingleColumnValueFilter` though found matched column, but didn't find matched value, and this row would be filtered out by `filterRow` method.
-7. 1~6 should finish an entire row, and `reset` is called between rows to reset filter status
+2. `filterRowKey` and `filterCell` can be regarded as entirety, first key then value, this philosophy is straightforward for a nosql system. `filterRowKey` is called to determine an entire row, while `filterCell` is called to determine a cell which returns a `ReturnCode` to indicate the next step. 
+3. `filterAllRemaining` may be called between filter key and filter value, but it is based on concrete implementation. Like `PageFilter` does filtering based on size of page, after a page is filled, `filterAllRemaining` is directly called to speed up filtering.
+4. `getNextCellHint` is just another kind of `filterCell`, but it does further filtering based on targeting to wanted cell, and it will be called only after `filterAllRemaining` returns false and `filterCell` returns `SEEK_NEXT_USING_HINT`.
+5. `transformCell` is called to transform a cell into user wanted only after `filterAllRemaining` returns false and `ReturnCode` is `INCLUDE***`, but it is not often used.
+6. `hasFilterRow`, `filterRow` and `filterRowCells` can be regarded as an entirety. If `hasFilterRow` returns false, those two left methods will not be called. `filterRowCells` is called to modify the pending return results list to client, it is not often used either. Then `filterRow` is called, the last chance to filter out entire row. Like `SingleColumnValueFilter` though found matched column, but didn't find matched value, and this row would be filtered out by `filterRow` method.
+7. 1~6 should finish an entire row, and `reset` is called between rows to reset filter status and continues next row.
 
 ## Thoughts
 - In server side code base, methods are called scatteredly, it can't be regard as a good looking framework.
