@@ -63,7 +63,7 @@ enum ReturnCode {
 
 ## Sequence
 But it is still confusing, so following it is the call sequence.
-![Filter call sequence](https://raw.githubusercontent.com/Reidddddd/reidddddd.github.io/master/assets/images/filter.png)
+![Filter call sequence](https://raw.githubusercontent.com/Reidddddd/reidddddd.github.io/65d06d59c7c2afb5494e22b39ddcfb3a65c874e4/assets/images/filter.png)
 1. `isFamilyEssential` is called first, but it does no filtering, it just helps to lock on the specified column family which may bring performance benefits by avoiding unnecessary column family scanning.
 2. `filterRowKey` and `filterCell` can be regarded as entirety, first key then value, this philosophy is straightforward for a nosql system. `filterRowKey` is called to determine an entire row, while `filterCell` is called to determine a cell which return a returncode to indicate the next step. 
 3. `filterAllRemaining` may be called between filter key and filter value, but it based on concrete implementation. Like `PageFilter` does filtering based on size of page, after a page is filled, `filterAllRemaining` is directly called to speed up filtering.
