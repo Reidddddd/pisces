@@ -381,12 +381,10 @@ han: false
 
 # Disqus
 disqus:
-  enable: true
+  enable: false
   shortname: R.C
-  count: false
-  # hide comments (visitors need to click to load the comments)
-  # count need to be false when hide is true
   hide: true
+  count: false
 
 # Hypercomments
 #hypercomments_id:
