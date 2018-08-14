@@ -24,9 +24,9 @@ HBase stores each cell individually, with its key and value. When a row has many
 
 ![diff](https://raw.githubusercontent.com/Reidddddd/reidddddd.github.io/master/assets/images/diff_key_encoder.png)
 
-- Flag is a byte, each bit has different meaning. Pos[0] is set, meaning previous cell and current cell have same key length, so key length of current cell will be omitted. Ditto for pos[1~2]. Pos[3] is set, meaning timestamps of two cells is different, and will write the difference only. Pos[4~6] three bits are used for recording the length of this timestamp or different timestamp, a long is 8 bytes, so there is a minus 1 before encoding. Pos[7] is used for recording if diff is signed.
+- Flag is a byte, each bit has different meaning. Pos[0] is set, meaning previous cell and current cell have same key length, so key length of current cell will be omitted. Ditto for pos[1~2]. Pos[3] is set, meaning timestamps of two cells is different, and will write the difference only. Pos[4~6] three bits are used for recording the length of this timestamp or different timestamp in byte, a long is 8 bytes, so there is a minus 1 before encoding. Pos[7] is used for recording if diff is signed.
 - cell_0 is the first cell, so it has a family part ahead, flag is 0x50, because timestamp occupies 5 bytes to store, then key/value length, following 0 common length, and the rest.
-- cell_1 flag is 0x0F, because cell_1's key/value length and type are equal to cell_0, note, their timestamp are different, so ts diff is set. The difference is 1 (15678918100-15678918099), so it is 0 after minus 1. Common length is 10, from row to qualifier. Ditto for cell_2.
+- cell_1 flag is 0x0F, because cell_1's key/value length and type are equal to cell_0, note, their timestamp are different, so ts diff is set. The difference is 1 (15678918100-15678918099) which occupies 1 byte, so it is 0 after minus 1. Common length is 10, from row to qualifier. Ditto for cell_2.
 - cell_3 flag is 0x8E, because key length is different, the different between two timestamps is -2 (previous - current), so pos[7] is set.
 
 ## FastDiffDeltaEncoder
