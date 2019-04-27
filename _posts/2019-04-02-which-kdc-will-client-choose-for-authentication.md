@@ -8,7 +8,7 @@ categories:
 
 ## Background
 
-In kerberized environment, every client should authenticate himself to KDC. For toy play, one KDC is enough, and it can serve all requests without overloading. But in production environment, with thousands of machines and clients, one KDC is not enough, a small auth traffic can lead to an application QPS downgrade. So, can auth requests are distributed to other KDCs in a cluster, and if so, how. 
+In kerberized environment, every client should authenticate himself to KDC. For toy play, one KDC is enough, and it can serve all requests without overloading. But in production environment, with thousands of machines and clients, one KDC is not enough, a small auth traffic can lead to an application QPS downgrade. So, can auth requests be distributed to other KDCs in a cluster, and if so, how. 
 
 ## Talk is cheap, ___
 Following is the snippet of how a client choose a KDC for authentication.
@@ -36,7 +36,7 @@ Back to question in the beginning,
 Q1: How a client determine which KDC for authentication?  
 A1: By the sequence of KDCs listed in `/etc/krb5.conf`  
 Q2: Can auth requests be distributed to other KDCs in a cluster?  
-A2: Yes, by giving out `/etc/krb5.conf` with different KDCs sequence.
+A2: Yes, by giving out `/etc/krb5.conf` with different KDCs sequence. But it is not a very elegant solution, because it has to distribute serveral `krb5.conf`s which is difficult for management from administrator perspective. Here it is another suggest which i'm using it in my production. Set up LVS-HAProxy-KeepAlive architecture before KDCs, let LVS do the load balancing that redirects auth requests to HAProxy, HAProxy strategically choose the backend KDCs and forward auth requests, KeepAlive to ensure one of HAProxy is working.
+A3: Why KDCs do not have built in load balancing?
+Q3: From my personal understanding, since master KDC is always the up-to-date one, while slave KDCs may have some lags from sync with master KDC which may lead to authentication failure if one of them is chosen. Sounds like a trade-off here, but this can be avoided as long as we `kprod` or transfer full DB snapshot to each slave KDC every time we update the master KDCs (like adding a pricipal, deleting a principal).
 
-
-But there's one thing need to point out, very important, all slave KDCs may have not catch up with the most updated db information in master KDC, so it is possible for a newly added client fail authentication himself to a slave KDC, for a while, only after KDCs sync done.
